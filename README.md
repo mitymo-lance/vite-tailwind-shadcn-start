@@ -10,7 +10,7 @@ Working barebones React Vite with Tailwind CSS and Shadcn/ui based on [The insta
 
     cd my-project
 
-    yarn install
+    bin/setup
 
     bin/dev
 
