@@ -1,4 +1,8 @@
-# React + TypeScript + Vite
+# vite-tailwind-shadcn-start
+
+Working barebones React Vite with Tailwind CSS and Shadcn/ui
+
+## React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
