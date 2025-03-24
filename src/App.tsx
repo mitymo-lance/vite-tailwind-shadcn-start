@@ -1,57 +1,89 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Layout from './components/Layout'
+import Display from './components/Display'
+import Row from './components/Row'
 import './App.css'
 import { Button } from '@/components/ui/button'
+import gameTimer from './services/GameTimer'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [isRunning, setIsRunning] = useState(false);
+  const [displayTime, setDisplayTime] = useState('00:00');
+
+  // Set initial time (15 minutes = 900 seconds)
+  useEffect(() => {
+    gameTimer.set(900);
+  }, []);
+
+  // Update display time every second
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+    
+    if (isRunning) {
+      intervalId = setInterval(() => {
+        const remainingSeconds = gameTimer.countDown();
+        const minutes = Math.floor(remainingSeconds / 60);
+        const seconds = remainingSeconds % 60;
+        setDisplayTime(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+      }, 1000);
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [isRunning]);
+
+  const onStart = () => {
+    setIsRunning(true);
+    gameTimer.start();
+  }
+
+  const onStop = () => {
+    setIsRunning(false);
+    gameTimer.stop();
+  }
+
+  const onReset = () => {
+    setIsRunning(false);
+    gameTimer.reset();
+    gameTimer.set(900); // Reset to 15 minutes
+    setDisplayTime('15:00');
+  }
 
   return (
     <Layout title="Scoreboard" subtitle="Welcome to the scoring system. Please sit and have a doughnut.">
-      <div className="min-h-screen bg-gray-100 w-full">
-        {/* Header Section */}
-        <div className="bg-white shadow-md w-full" style={{ display: 'none'}}>
-          <div className="px-4 py-8 sm:px-6 lg:px-8">
-          </div>
-        </div>
-
-        {/* Main Content Section */}
-        <div className="px-4 py-8 sm:px-6 lg:px-8">
-          <p>Hey whats happening?</p>
-          <div className="bg-white rounded-lg shadow-md p-6 space-y-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-2">
-                <h2 className="text-xl font-semibold text-gray-800">Current Score</h2>
-                <p className="text-4xl font-bold text-blue-600">{count}</p>
-              </div>
-              <Button 
-                variant="default" 
-                onClick={() => setCount((count) => count + 1)}
-                className="px-6 py-2"
-              >
-                Increment Score
-              </Button>
+      {/* Main Content Section */}
+      <div>
+        <Row>
+          <Display title="Home Score" width="1/4">
+            <p>2</p>
+          </Display>
+          <Display title="Game Time" width="1/2">
+            <p className="text-6xl font-mono">{displayTime}</p>
+            <div className="space-x-2 mt-4">
+              {isRunning ? (
+                <Button onClick={onStop} variant="destructive">Stop</Button>
+              ) : (
+                <Button onClick={onStart}>Start</Button>
+              )}
+              <Button onClick={onReset} variant="outline">Reset</Button>
             </div>
+          </Display>
+          <Display title="Visitor Score" width="1/4">
+            <p>1</p>
+          </Display>
+        </Row>
 
-            <div className="border-t pt-4">
-              <p className="text-sm text-gray-500">
-                Edit <code className="bg-gray-100 px-2 py-1 rounded">src/App.tsx</code> and save to test HMR
-              </p>
-            </div>
-          </div>
-
-        </div>
-
-        {/* Footer Section */}
-        <div className="bg-white shadow-md mt-8 w-full">
-          <div className="px-4 py-8 sm:px-6 lg:px-8">
-            <p className="text-center text-gray-600">
-              Uses <a href="https://tailwindcss.com/" className="text-blue-500">Tailwind CSS</a> and <a href="https://shadcn.com/" className="text-blue-500">Shadcn</a> for styling and components.
+        <br></br>
+        <Row>
+          <div className="border-t pt-4">
+            <p className="text-sm text-gray-500">
+              Edit <code className="bg-gray-100 px-2 py-1 rounded">src/App.tsx</code> and save to test HMR
             </p>
           </div>
-        </div>
-
-
+        </Row>
       </div>
     </Layout>
   )
