@@ -58,10 +58,15 @@ function App() {
       <div>
         <Row>
           <Display title="Home Score" width="1/4">
-            <p>2</p>
+            <div className="score-display">
+              <p className="score-display-font">2</p>
+            </div>
           </Display>
           <Display title="Game Time" width="1/2">
-            <p className="text-6xl font-mono">{displayTime}</p>
+            <div className="timer-display">
+              <p className="text-6xl font-mono timer-display-font text-red-500">{displayTime}</p>
+            </div>
+            
             <div className="space-x-2 mt-4">
               {isRunning ? (
                 <Button onClick={onStop} variant="destructive">Stop</Button>
@@ -72,7 +77,9 @@ function App() {
             </div>
           </Display>
           <Display title="Visitor Score" width="1/4">
-            <p>1</p>
+            <div className="score-display">
+              <p className="score-display-font">1</p>
+            </div>
           </Display>
         </Row>
 
