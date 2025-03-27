@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
-import Layout from './components/Layout'
-import Display from './components/Display'
-import Row from './components/Row'
+import Layout from './components/Layout.tsx'
+import Display from './components/Display.tsx'
+import Row from './components/Row.tsx'
 import './App.css'
-import { iris } from './services/iris'
-import Panel from './components/Panel'
+import { iris } from './services/iris.ts'
+import Panel from './components/Panel.tsx'
 
 function App() {
   const [displayTime, setDisplayTime] = useState('00:00');
