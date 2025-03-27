@@ -4,7 +4,7 @@ interface RowProps {
 
 export default function Row({ children }: RowProps) {
   return (
-    <div name="row" className="flex clear-both py-4 mx-2">
+    <div className="mr-row flex flex-row justify-stretch clear-both py-4 mx-2 w-full">
       {children}
     </div>
   )

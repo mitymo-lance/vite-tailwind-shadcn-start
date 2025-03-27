@@ -3,95 +3,173 @@ import Layout from './components/Layout'
 import Display from './components/Display'
 import Row from './components/Row'
 import './App.css'
-import { Button } from '@/components/ui/button'
-import gameTimer from './services/GameTimer'
+import { iris } from './services/iris'
+import Panel from './components/Panel'
 
 function App() {
-  const [isRunning, setIsRunning] = useState(false);
   const [displayTime, setDisplayTime] = useState('00:00');
+  const [homeScore, setHomeScore] = useState(0);
+  const [visitorScore, setVisitorScore] = useState(0);
+  const [homeTimeout, setHomeTimeout] = useState(0);
+  const [visitorTimeout, setVisitorTimeout] = useState(0);
+  const [period, setPeriod] = useState(0);
+  const [down, setDown] = useState(0);
+  const [toGo, setToGo] = useState(0);
+  const [ballOn, setBallOn] = useState(0);
+  const [scoreboardActive, setScoreboardActive] = useState(0);
 
-  // Set initial time (15 minutes = 900 seconds)
+  const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected'>('disconnected');
+
+
+  // Connect to Iris server when component mounts
   useEffect(() => {
-    gameTimer.set(900);
-  }, []);
-
-  // Update display time every second
-  useEffect(() => {
-    let intervalId: NodeJS.Timeout;
-    
-    if (isRunning) {
-      intervalId = setInterval(() => {
-        const remainingSeconds = gameTimer.countDown();
-        const minutes = Math.floor(remainingSeconds / 60);
-        const seconds = remainingSeconds % 60;
-        setDisplayTime(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
-      }, 1000);
-    }
-
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
+    const handleConnect = async () => {
+      try {
+        setConnectionStatus('connecting');
+        await iris.connect();
+        setConnectionStatus('connected');
+      } catch (error) {
+        console.error('Failed to connect to Iris:', error);
+        setConnectionStatus('disconnected');
       }
     };
-  }, [isRunning]);
 
-  const onStart = () => {
-    setIsRunning(true);
-    gameTimer.start();
-  }
+    handleConnect();
+    
+    // Set up message handler
+    iris.onMessage = (message) => {
+       if(message == 'AUTH_SUCCESS') return;
 
-  const onStop = () => {
-    setIsRunning(false);
-    gameTimer.stop();
-  }
+      try {
+        const cleanMessage = message.replace(/[\x02\x03]/g, '');
+        
+        const data = JSON.parse(cleanMessage);
+        //console.log(data);
 
-  const onReset = () => {
-    setIsRunning(false);
-    gameTimer.reset();
-    gameTimer.set(900); // Reset to 15 minutes
-    setDisplayTime('15:00');
-  }
+        // Handle different message types
+        const clockNode = data.Nodes.find((node: any) => node.VBLDesc === 'clock');
+        setDisplayTime(clockNode.VBLValue);
+        
+        const homeScoreNode = data.Nodes.find((node: any) => node.VBLDesc === 'homeScore');
+        setHomeScore(homeScoreNode.VBLValue);
+
+        const visitorScoreNode = data.Nodes.find((node: any) => node.VBLDesc === 'guestScore');
+        setVisitorScore(visitorScoreNode.VBLValue);
+
+        const homeTimeoutNode = data.Nodes.find((node: any) => node.VBLDesc === 'homeTOL');
+        setHomeTimeout(homeTimeoutNode.VBLValue);
+
+        const visitorTimeoutNode = data.Nodes.find((node: any) => node.VBLDesc === 'guestTOL');
+        setVisitorTimeout(visitorTimeoutNode.VBLValue);
+
+        const periodNode = data.Nodes.find((node: any) => node.VBLDesc === 'period');
+        setPeriod(periodNode.VBLValue);
+
+        const downNode = data.Nodes.find((node: any) => node.VBLDesc === 'down');
+        setDown(downNode.VBLValue);
+
+        const toGoNode = data.Nodes.find((node: any) => node.VBLDesc === 'togo');
+        setToGo(toGoNode.VBLValue);
+
+        const ballOnNode = data.Nodes.find((node: any) => node.VBLDesc === 'ballon');
+        setBallOn(ballOnNode.VBLValue);
+
+        const scoreboardActiveNode = data.Nodes.find((node: any) => node.VBLDesc === 'scoreboardActive');
+        setScoreboardActive(scoreboardActiveNode.VBLValue);
+
+      } catch (error) {
+        console.error('Error processing Iris message:', error);
+        console.log('message: ' + message);
+      }
+    };
+    
+    // Cleanup function to handle component unmount
+    return () => {
+      try {
+        if (iris.socket) {
+          iris.socket.close();
+          iris.socket = null;
+        }
+      } catch (error) {
+        console.error('Error disconnecting from Iris:', error);
+      }
+    };
+  }, []); // Empty dependency array means this runs once on mount
+
 
   return (
     <Layout title="Scoreboard" subtitle="Welcome to the scoring system. Please sit and have a doughnut.">
-      {/* Main Content Section */}
-      <div>
-        <Row>
-          <Display title="Home Score" width="1/4">
-            <div className="score-display">
-              <p className="score-display-font">2</p>
-            </div>
-          </Display>
-          <Display title="Game Time" width="1/2">
-            <div className="timer-display">
-              <p className="text-6xl font-mono timer-display-font text-red-500">{displayTime}</p>
-            </div>
-            
-            <div className="space-x-2 mt-4">
-              {isRunning ? (
-                <Button onClick={onStop} variant="destructive">Stop</Button>
-              ) : (
-                <Button onClick={onStart}>Start</Button>
-              )}
-              <Button onClick={onReset} variant="outline">Reset</Button>
-            </div>
-          </Display>
-          <Display title="Visitor Score" width="1/4">
-            <div className="score-display">
-              <p className="score-display-font">1</p>
-            </div>
-          </Display>
-        </Row>
-
-        <br></br>
-        <Row>
-          <div className="border-t pt-4">
-            <p className="text-sm text-gray-500">
-              Edit <code className="bg-gray-100 px-2 py-1 rounded">src/App.tsx</code> and save to test HMR
-            </p>
-          </div>
-        </Row>
+      {/* Connection Status */}
+      <div className={`text-sm mb-4 text-center ${
+        connectionStatus === 'connected' ? 'text-green-500' :
+        connectionStatus === 'connecting' ? 'text-yellow-500' :
+        'text-red-500'
+      }`}>
+        Status: {connectionStatus.charAt(0).toUpperCase() + connectionStatus.slice(1)}
       </div>
+
+      {/* Main Content Section */}
+      <Panel bgColor="black" className="bg-black">
+        <Row>
+          <Display title="Period" width="full">
+            <div className="lcd-display">
+              <p className="lcd-display-font">{period}</p>
+            </div>
+          </Display>
+          <Display title="" width="full" type="timer">
+            <div className="lcd-display">
+              <p className="text-6xl font-mono lcd-display-font text-red-500">{displayTime}</p>
+            </div>
+          </Display>
+          <Display title="Down" width="full" >
+            <div className="lcd-display">
+              <p className="lcd-display-font">{down}</p>
+            </div>
+          </Display>
+        </Row>
+      </Panel>
+    
+      <Row>
+        <Panel>
+          <Display title="Home" width="full" type="score">
+            <div className="lcd-display">
+              <p className="lcd-display-font">{homeScore}</p>
+            </div>
+          </Display>
+          <Display title="Timeouts" width="full">
+            <div className="space-x-2 mt-4">
+              <p className="text-sm font-semibold text-gray-800 text-center uppercase font-mono">{homeTimeout}</p>
+            </div>
+          </Display>
+        </Panel>
+        <Panel>
+          <Display title="Visitor" width="full" type="score">
+            <div className="lcd-display">
+              <p className="lcd-display-font">{visitorScore}</p>
+            </div>
+          </Display>
+          <Display title="Timeouts" width="full">
+            <div className="space-x-2 mt-4">
+              
+              <p className="text-sm font-semibold text-gray-800 text-center uppercase font-mono">{visitorTimeout}</p>
+            </div>
+          </Display>
+        </Panel>
+      </Row>
+
+      <Panel bgColor="black">
+        <Row>
+          <Display title="To Go" width="full">
+            {toGo}  
+          </Display>
+          <Display title="Ball On" width="full">
+            {ballOn}
+          </Display>
+          <Display title="Scoreboard Active" width="full">
+            {scoreboardActive}
+          </Display>
+        </Row>
+      </Panel>
     </Layout>
   )
 }
