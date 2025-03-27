@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import Layout from './components/Layout'
 import Panel from './components/Panel'
-import Display from './components/Display'
+import ScoreDisplay from './components/ScoreDisplay'
 import Row from './components/Row'
 import './App.css'
 import { iris } from './services/iris'
@@ -112,63 +112,68 @@ function App() {
       {/* Main Content Section */}
       <Panel bgColor="black" className="bg-black">
         <Row>
-          <Display title="Period" width="full">
+          <ScoreDisplay title="Period" width="full">
             <div className="lcd-display">
               <p className="lcd-display-font">{period}</p>
             </div>
-          </Display>
-          <Display title="" width="full" type="timer">
+          </ScoreDisplay>
+          <ScoreDisplay title="" width="full" type="timer">
             <div className="lcd-display">
               <p className="text-6xl font-mono lcd-display-font text-red-500">{displayTime}</p>
             </div>
-          </Display>
-          <Display title="Down" width="full" >
+          </ScoreDisplay>
+          <ScoreDisplay title="Down" width="full" >
             <div className="lcd-display">
               <p className="lcd-display-font">{down}</p>
             </div>
-          </Display>
+          </ScoreDisplay>
         </Row>
       </Panel>
     
       <Row>
         <Panel>
-          <Display title="Home" width="full" type="score">
+          <ScoreDisplay title="Home" width="full" type="score">
             <div className="lcd-display">
               <p className="lcd-display-font">{homeScore}</p>
             </div>
-          </Display>
-          <Display title="Timeouts" width="full">
+          </ScoreDisplay>
+          <ScoreDisplay title="Timeouts" width="full">
             <div className="space-x-2 mt-4">
               <p className="text-sm font-semibold text-gray-800 text-center uppercase font-mono">{homeTimeout}</p>
             </div>
-          </Display>
+          </ScoreDisplay>
         </Panel>
         <Panel>
-          <Display title="Visitor" width="full" type="score">
+          <ScoreDisplay title="Visitor" width="full" type="score">
             <div className="lcd-display">
               <p className="lcd-display-font">{visitorScore}</p>
             </div>
-          </Display>
-          <Display title="Timeouts" width="full">
+          </ScoreDisplay>
+          <ScoreDisplay title="Timeouts" width="full">
             <div className="space-x-2 mt-4">
-              
               <p className="text-sm font-semibold text-gray-800 text-center uppercase font-mono">{visitorTimeout}</p>
             </div>
-          </Display>
+          </ScoreDisplay>
         </Panel>
       </Row>
 
       <Panel bgColor="black">
         <Row>
-          <Display title="To Go" width="full">
-            {toGo}  
-          </Display>
-          <Display title="Ball On" width="full">
-            {ballOn}
-          </Display>
-          <Display title="Scoreboard Active" width="full">
+          <ScoreDisplay title="To Go" width="full">
+            <div className="lcd-display">
+              <p className="lcd-display-font">{toGo}</p>
+            </div>
+          </ScoreDisplay>
+          <ScoreDisplay title="Ball On" width="full">
+            <div className="lcd-display">
+              <p className="lcd-display-font">
+                {ballOn}
+              </p>
+            </div>
+          </ScoreDisplay>
+          <ScoreDisplay title="Scoreboard Active" width="full">
             {scoreboardActive}
-          </Display>
+          </ScoreDisplay>
         </Row>
       </Panel>
     </Layout>
