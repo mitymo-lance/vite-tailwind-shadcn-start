@@ -85,16 +85,7 @@ function App() {
     };
     
     // Cleanup function to handle component unmount
-    return () => {
-      try {
-        if (iris.socket) {
-          iris.socket.close();
-          iris.socket = null;
-        }
-      } catch (error) {
-        console.error('Error disconnecting from Iris:', error);
-      }
-    };
+    return;
   }, []); // Empty dependency array means this runs once on mount
 
 
@@ -163,8 +154,6 @@ function App() {
             <div className="lcd-display">
               <p className="lcd-display-font">{toGo}</p>
             </div>
-          </ScoreDisplay>
-          <ScoreDisplay title="Ball On" width="full">
             <div className="lcd-display">
               <p className="lcd-display-font">
                 {ballOn}

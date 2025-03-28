@@ -7,17 +7,10 @@ export const iris = {
   channelId: "1603883785",
 
   connect: () => {
-    if(iris.socket) {
-      try {
-        iris.socket.close();
-      } catch (e) {
-        console.error('Error closing existing socket:', e);
-      }
-      iris.socket = null;
-    }
+    
 
     try {
-      const wsUrl = `ws://${iris.serverAddress}:${iris.serverPort}`;
+      const wsUrl = `wss://${iris.serverAddress}:${iris.serverPort}`;
       iris.socket = new WebSocket(wsUrl);
       iris.socket.onmessage = (event) => {
         //console.log('onmessage event:', event);
