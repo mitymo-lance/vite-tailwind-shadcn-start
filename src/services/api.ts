@@ -7,14 +7,6 @@ const api = axios.create({
   },
 });
 
-export const getScores = async () => {
-  const response = await api.get('/scores');
-  return response.data;
-};
 
-export const updateScore = async (score: any) => {
-  const response = await api.put(`/scores/${score.id}`, score);
-  return response.data;
-};
 
 export default api; 
